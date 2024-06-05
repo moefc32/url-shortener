@@ -1,2 +1,16 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script>
+  import MainContent from "./partial/MainContent.svelte";
+  import LoginForm from "./partial/LoginForm.svelte";
+
+  export let data;
+
+  let isLoggedIn = data.isLoggedIn;
+</script>
+
+<main class="flex flex-col justify-center items-stretch flex-1 mb-auto p-5 w-full">
+  {#if !isLoggedIn}
+    <LoginForm />
+  {:else}
+    <MainContent {data} />
+  {/if}
+</main>

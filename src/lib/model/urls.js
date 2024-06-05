@@ -1,16 +1,30 @@
 import { ObjectId } from 'mongodb';
 import mongoClient from '../mongodb';
 
-const collection = mongoClient.db().collection('entry');
+const collection = mongoClient.db().collection('urls');
 
 export default {
-    getData: async () => {
+    getData: async (page = 1, pageSize = 10) => {
         try {
-            const result = await collection.find().toArray();
+            const skip = (page - 1) * pageSize;
+            const result = await collection.find()
+                .skip(skip)
+                .limit(pageSize)
+                .toArray();
+
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error('Error when getting all entries!');
+            throw new Error('Error when getting data!');
+        }
+    },
+    getEntry: async (short, user_meta) => {
+        try {
+            const result = await collection.findOne({ short });
+            return result;
+        } catch (e) {
+            console.error(e);
+            throw new Error('Error when getting data!');
         }
     },
     createData: async (data) => {
@@ -24,7 +38,7 @@ export default {
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error('Error when creating entry!');
+            throw new Error('Error when creating data!');
         }
     },
     editData: async (id, data) => {
@@ -36,7 +50,7 @@ export default {
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error('Error when editing entry!');
+            throw new Error('Error when editing data!');
         }
     },
     deleteData: async (id) => {
@@ -47,7 +61,7 @@ export default {
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error('Error when deleting entry!');
+            throw new Error('Error when deleting data!');
         }
     },
 }
