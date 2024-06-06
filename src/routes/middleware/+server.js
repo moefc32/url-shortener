@@ -27,7 +27,7 @@ export async function POST({ request }) {
         } = await request.json() || {};
 
         if (title && short && long) {
-            const created_at = new Date(due);
+            const created_at = new Date();
             const data = {
                 title,
                 short,

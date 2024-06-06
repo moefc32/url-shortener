@@ -17,8 +17,6 @@ export async function load({ fetch, cookies }) {
             urls: data,
         };
     } catch (e) {
-        console.error(e);
-
         return {
             appName: VITE_APP_NAME,
             isLoggedIn: false,

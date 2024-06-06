@@ -9,7 +9,7 @@
 
 <main class="flex flex-col justify-center items-stretch flex-1 mb-auto p-5 w-full">
   {#if !isLoggedIn}
-    <LoginForm />
+    <LoginForm {data} />
   {:else}
     <MainContent {data} />
   {/if}

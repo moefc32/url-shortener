@@ -18,8 +18,6 @@ export async function POST({ request, cookies }) {
                 const passwordMatch = await bcrypt.compare(password, result.password);
 
                 if (passwordMatch) {
-
-                    console.log('login sukses')
                     delete result.password;
 
                     const accessToken = jwt.sign({ id: result._id },

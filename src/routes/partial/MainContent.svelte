@@ -1,11 +1,21 @@
 <script>
-  import { Paginator } from "@skeletonlabs/skeleton";
+  import { setContext } from "svelte";
+  import {
+    getModalStore,
+    getToastStore,
+    Paginator,
+  } from "@skeletonlabs/skeleton";
   import datePrettier from "$lib/datePrettier";
   import axios from "axios";
 
+  import DetailModal from "./ModalDetail.svelte";
+
+  const modalStore = getModalStore();
+  const toastStore = getToastStore();
+
   export let data;
 
-  let urls = data.urls;
+  let { urls } = data;
   let paginationSettings = {
     page: 0,
     limit: 10,
@@ -21,10 +31,87 @@
       console.error(e);
     }
   }
+
+  async function openCreateModal() {
+    modalStore.trigger({
+      title: "Create New Short URL",
+      type: "component",
+      component: {
+        ref: DetailModal,
+      },
+      response: async (r) => {
+        if (r?.type === "submit") {
+          await axios.post("middleware", r.formData, { withCredentials: true });
+          await loadData();
+
+          modalStore.close();
+
+          toastStore.trigger({
+            message: "New short URL created successfully.",
+            background: "variant-filled-success",
+          });
+        }
+      },
+    });
+  }
+
+  async function openEditModal(item) {
+    modalStore.trigger({
+      title: "Edit Short URL",
+      type: "component",
+      component: {
+        ref: DetailModal,
+      },
+      meta: {
+        ...item,
+      },
+      response: async (r) => {
+        if (r?.type === "submit") {
+          await axios.patch(`middleware/?id=${r.formData._id}`, r.formData, {
+            withCredentials: true,
+          });
+          await loadData();
+
+          modalStore.close();
+        }
+
+        if (r?.type === "delete") {
+          openDeleteModal(r.formData._id);
+          modalStore.close();
+        }
+      },
+    });
+  }
+
+  async function openDeleteModal(id) {
+    modalStore.trigger({
+      title: "Delete short URL",
+      type: "confirm",
+      body: `Are you sure you want to delete <strong>main</strong>?`,
+      response: async (rsp) => {
+        if (rsp) {
+          await axios.delete(`middleware/?id=${id}`, { withCredentials: true });
+          await loadData();
+
+          toastStore.trigger({
+            message: "Short URL deleted successfully.",
+            background: "variant-filled-error",
+          });
+        }
+      },
+    });
+  }
+
+  async function loadData() {
+    const result = await axios.get("middleware", { withCredentials: true });
+    urls = result.data.data;
+  }
+
+  setContext("loadData", loadData);
 </script>
 
 <header
-  class="card flex flex-row items-center gap-3 mb-3 px-5 py-3 bg-slate-50"
+  class="card flex flex-row items-center gap-3 mb-3 px-5 py-3 variant-filled-surface"
 >
   <a href="/">
     <h1 class="text-lg font-bold">{data.appName}</h1>
@@ -53,6 +140,29 @@
   </button>
 </header>
 <div class="card flex-1 p-5 bg-slate-50">
+  <div class="flex mb-3">
+    <button
+      class="btn btn-sm variant-filled-primary"
+      on:click={() => openCreateModal()}
+      ><svg
+        class="w-5 h-5 me-1"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 12h14m-7 7V5"
+        />
+      </svg> Create New Short Link</button
+    >
+  </div>
   <div class="table-container mb-3">
     <table class="table table-compact table-hover">
       <thead>
@@ -92,7 +202,8 @@
             <td>{item.clicks.length}</td>
             <td>
               <button
-                class="btn btn-sm variant-filled bg-warning-500 text-black"
+                class="chip variant-filled-warning"
+                on:click={() => openEditModal(item)}
                 ><svg
                   class="w-3 h-3 me-1"
                   aria-hidden="true"
@@ -111,7 +222,9 @@
                   />
                 </svg> Edit</button
               >
-              <button class="btn btn-sm variant-filled bg-error-500"
+              <button
+                class="chip variant-filled-error"
+                on:click={() => openDeleteModal(item._id)}
                 ><svg
                   class="w-3 h-3 me-1"
                   aria-hidden="true"

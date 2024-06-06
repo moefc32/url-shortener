@@ -1,5 +1,11 @@
 <script>
+  import { getToastStore } from "@skeletonlabs/skeleton";
+  import Joi from "joi";
   import axios from "axios";
+
+  const toastStore = getToastStore();
+
+  export let data;
 
   const form = {
     email: "",
@@ -12,12 +18,31 @@
 
   async function doLogin() {
     try {
-      if (form.email && form.password) {
-        const response = await axios.post("/middleware/auth", { ...form });
-        window.location.href = "/";
+      if (!form.email || !form.password) {
+        return toastStore.trigger({
+          message: "All field must be filled!",
+          background: "variant-filled-error",
+        });
       }
+
+      const schema = Joi.object({
+        email: Joi.string()
+          .email({ tlds: { allow: false } })
+          .required(),
+        password: Joi.string().min(8).required(),
+      });
+      const { error } = schema.validate(form);
+
+      if (error) throw new Error();
+
+      const response = await axios.post("/middleware/auth", { ...form });
+      window.location.href = "/";
     } catch (e) {
       console.error(e);
+      toastStore.trigger({
+        message: "Login failed, please try again!",
+        background: "variant-filled-error",
+      });
     }
   }
 </script>
@@ -27,6 +52,9 @@
 >
   <div class="container">
     <h1 class="mb-3 text-3xl text-center">Login</h1>
+    <p class="mb-3 text-center text-slate-700">
+      Please login to access {data.appName ?? "this app"}
+    </p>
     <label class="label mb-3">
       <span>Email</span>
       <input
