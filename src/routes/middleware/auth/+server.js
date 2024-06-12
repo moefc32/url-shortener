@@ -1,4 +1,4 @@
-import { VITE_APP_NAME, VITE_SECRET_KEY } from '$env/static/private'
+import { VITE_APP_NAME, VITE_SECRET_KEY, VITE_JWT_EXPIRATION } from '$env/static/private'
 import { json, error } from '@sveltejs/kit';
 import model from '$lib/model/auth';
 import bcrypt from 'bcrypt';
@@ -19,13 +19,15 @@ export async function POST({ request, cookies }) {
 
                 if (passwordMatch) {
                     delete result.password;
+                    const expiration = parseInt(VITE_JWT_EXPIRATION) * 60 * 60;
 
                     const accessToken = jwt.sign({ id: result._id },
-                        VITE_SECRET_KEY, { expiresIn: '1h' });
+                        VITE_SECRET_KEY, { algorithm: 'RS256', expiresIn: expiration });
 
                     cookies.set('access_token', accessToken, {
                         path: '/',
-                        expires: new Date(Date.now() + 60 * 60 * 1000),
+                        httpOnly: true,
+                        maxAge: expiration,
                     });
 
                     return json({
