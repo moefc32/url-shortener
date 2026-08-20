@@ -8,6 +8,10 @@ preview_urls = false
 [observability.logs]
 enabled = true
 
+[assets]
+binding = "ASSETS"
+directory = "./view"
+
 [[d1_databases]]
 binding = "D1_URL_SHORTENER"
 database_name = "mfc-website"

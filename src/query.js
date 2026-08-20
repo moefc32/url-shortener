@@ -3,11 +3,11 @@ export async function getLongURL(db, short) {
         .prepare(`
             UPDATE URL_Shortener
             SET hit = hit + 1
-            WHERE short = ?
-            RETURNING long;
+            WHERE short_url = ?
+            RETURNING long_url;
         `)
         .bind(short)
         .first();
 
-    return result.results;
+    return result?.long_url;
 }

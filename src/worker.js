@@ -1,12 +1,38 @@
+import { Hono } from 'hono';
 import { getLongURL } from './query.js';
 
-export default {
-    async email(message, env, ctx) {
-        const blocked = await getLongURL(
-            env.D1_URL_SHORTENER,
-            message.from.trim().toLowerCase()
-        );
+const app = new Hono();
 
-        if (blocked) return;
-    }
-}
+app.get('/', async (c) => {
+    const response = await c.env.ASSETS.fetch(
+        new Request(new URL('/index.html', c.req.url))
+    );
+
+    return new Response(response.body, {
+        headers: response.headers,
+    });
+});
+
+app.get('/:short', async (c) => {
+    const env = c.env;
+    const longURL = await getLongURL(
+        env.D1_URL_SHORTENER,
+        c.req.param('short')
+    );
+
+    if (longURL) return c.redirect(longURL, 302);
+    return c.notFound();
+});
+
+app.notFound(async (c) => {
+    const response = await c.env.ASSETS.fetch(
+        new Request(new URL('/404.html', c.req.url))
+    );
+
+    return new Response(response.body, {
+        status: 404,
+        headers: response.headers,
+    });
+});
+
+export default app;
