@@ -3,16 +3,6 @@ import { getLongURL } from './query.js';
 
 const app = new Hono();
 
-app.get('/', async (c) => {
-    const response = await c.env.ASSETS.fetch(
-        new Request(new URL('/index.html', c.req.url))
-    );
-
-    return new Response(response.body, {
-        headers: response.headers,
-    });
-});
-
 app.get('/:short', async (c) => {
     const env = c.env;
     const longURL = await getLongURL(
