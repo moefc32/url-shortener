@@ -60,12 +60,12 @@
             color: #e5e7eb;
         }
 
-        #copyright {
+        [data-copyright] {
             position: relative;
             padding-left: 1.5em;
         }
 
-        #copyright::before {
+        [data-copyright]::before {
             content: "";
             position: absolute;
             width: 1.25em;
@@ -90,15 +90,15 @@
                 unchanged. There is little reason to stay; this is simply a place to pass through before continuing
                 onward, wherever the path may lead.
             </p>
-            <p id="copyright">URL Shortener by <a href="https://mf-chan.com">Mfc</a> &copy;</p>
+            <p data-copyright>URL Shortener by <a href="https://mf-chan.com">Mfc</a> &copy;</p>
         </article>
     </main>
 
     <script>
         const getYear = new Date().getFullYear();
-        const currentYear = (getYear > 2026 ? `2026 - ` : '') + getYear;
+        const currentYear = (getYear > 2018 ? `2018 - ` : '') + getYear;
 
-        document.querySelector('#copyright').append(` ${currentYear}`);
+        document.querySelector('[data-copyright]').append(` ${currentYear}`);
     </script>
 </body>
 
